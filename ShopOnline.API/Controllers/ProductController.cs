@@ -32,7 +32,7 @@ namespace ShopOnline.API.Controllers
                 }
                 else
                 {
-                    var productDtos = products.ConvertDto(productCategories);
+                    var productDtos = products.ConvertToDto(productCategories);
 
                     return Ok(productDtos);
                 }
@@ -58,7 +58,7 @@ namespace ShopOnline.API.Controllers
                 {
                     var productCategory = await this.productRepository.GetCategory(product.CategoryId);
 
-                    var productDto = product.ConvertDto(productCategory);
+                    var productDto = product.ConvertToDto(productCategory);
                     
                     return Ok(productDto);
                 }

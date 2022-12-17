@@ -11,6 +11,10 @@ namespace ShopOnline.Web.Pages
 
         [Inject]
         public IProductService ProductService { get; set; }
+        
+
+        [Inject]
+        public IShoppingCartService ShoppingCartService{ get; set; }
 
         public ProductDto Product{ get; set; }
 
@@ -25,6 +29,19 @@ namespace ShopOnline.Web.Pages
             catch (Exception ex)
             {
                 ErrorMessage = ex.Message;
+            }
+        }
+
+        protected async Task AddToCart_Click(CartItemToAddDto cartItemToAddDto)
+        {
+            try
+            {
+                var cartItemDto = await ShoppingCartService.AddItem(cartItemToAddDto);
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
         }
     }

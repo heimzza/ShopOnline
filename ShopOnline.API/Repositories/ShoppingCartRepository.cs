@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ShopOnline.API.Data;
 using ShopOnline.API.Entities;
+using ShopOnline.API.Extensions;
 using ShopOnline.API.Repositories.Contracts;
 using ShopOnline.Models.Dtos;
 
@@ -23,7 +24,13 @@ namespace ShopOnline.API.Repositories
         public async Task<CartItem> AddItem(CartItemToAddDto cartItemToAddDto)
         {
             if (await CartItemExists(cartItemToAddDto.CartId, cartItemToAddDto.ProductId))
-                return null;
+            {
+                var cartItem = await this.shopOnlineDbContext
+                                         .CartItems.FirstAsync<CartItem>(ci => ci.CartId == cartItemToAddDto.CartId &&
+                                                                               ci.ProductId == cartItemToAddDto.ProductId);
+
+                return await UpdateQty(cartItem.Id, new CartItemQtyUpdateDto { CartItemId = cartItem.Id, Qty = cartItem.Qty + 1 });
+            }
             
             var item = await (from product in this.shopOnlineDbContext.Products
                               where product.Id == cartItemToAddDto.ProductId
@@ -87,9 +94,18 @@ namespace ShopOnline.API.Repositories
                           }).ToListAsync();
         }
 
-        public Task<CartItem> UpdateQty(int id, CartItemQtyUpdateDto cartItemQtyUpdateDto)
+        public async Task<CartItem> UpdateQty(int id, CartItemQtyUpdateDto cartItemQtyUpdateDto)
         {
-            throw new NotImplementedException();
+            var item = await this.shopOnlineDbContext.CartItems.FindAsync(id);
+
+            if (item != null)
+            {
+                item.Qty = cartItemQtyUpdateDto.Qty;
+                await this.shopOnlineDbContext.SaveChangesAsync();
+                return item;
+            }
+
+            return null;
         }
     }
 }
